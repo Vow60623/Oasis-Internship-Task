@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Auth System</title>
+  <link rel="stylesheet" href="app2.css">
+</head>
+<body>
+
+  <div id="app"></div>
+
+  <script>
+    const app = document.getElementById("app");
+
+    
+    function loadPage() {
+      const loggedInUser = localStorage.getItem("loggedInUser");
+      if (loggedInUser) {
+        securedPage(loggedInUser);
+      } else {
+        loginPage();
+      }
+    }
+
+    
+    function registerPage() {
+      app.innerHTML = `
+        <div class="box">
+          <h2>Register</h2>
+          <input type="text" id="regUser" placeholder="Enter username" />
+          <input type="password" id="regPass" placeholder="Enter password" />
+          <button onclick="register()">Register</button>
+          <p><a href="#" onclick="loginPage()">Already have an account? Login</a></p>
+          <p id="msg"></p>
+        </div>
+      `;
+    }
+
+    function register() {
+      const username = document.getElementById("regUser").value;
+      const password = document.getElementById("regPass").value;
+      const msg = document.getElementById("msg");
+
+      if (!username || !password) {
+        msg.textContent = "❌ Please enter both fields.";
+        msg.className = "error";
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users")) || {};
+
+      if (users[username]) {
+        msg.textContent = "❌ Username already exists.";
+        msg.className = "error";
+        return;
+      }
+
+      users[username] = password; 
+      localStorage.setItem("users", JSON.stringify(users));
+
+      msg.textContent = "✅ Registration successful! Please login.";
+      msg.className = "success";
+    }
+
+   
+    function loginPage() {
+      app.innerHTML = `
+        <div class="box">
+          <h2>Login</h2>
+          <input type="text" id="logUser" placeholder="Enter username" />
+          <input type="password" id="logPass" placeholder="Enter password" />
+          <button onclick="login()">Login</button>
+          <p><a href="#" onclick="registerPage()">New user? Register here</a></p>
+          <p id="msg"></p>
+        </div>
+      `;
+    }
+
+    function login() {
+      const username = document.getElementById("logUser").value;
+      const password = document.getElementById("logPass").value;
+      const msg = document.getElementById("msg");
+
+      let users = JSON.parse(localStorage.getItem("users")) || {};
+
+      if (users[username] && users[username] === password) {
+        localStorage.setItem("loggedInUser", username);
+        securedPage(username);
+      } else {
+        msg.textContent = "❌ Invalid username or password.";
+        msg.className = "error";
+      }
+    }
+
+    
+    function securedPage(username) {
+      app.innerHTML = `
+        <div class="box">
+          <h2>Welcome, ${username} 🎉</h2>
+          <p>You are now logged in and can access this secured page.</p>
+          <button onclick="logout()">Logout</button>
+        </div>
+      `;
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      loginPage();
+    }
+
+    
+    loadPage();
+  </script>
+</body>
+</html>
